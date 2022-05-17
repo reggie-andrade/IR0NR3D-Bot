@@ -252,4 +252,4 @@ async def rank(ctx, text):
 
 # Finalization ======================================================================================================================
 # Run the bot using the bot's key
-bot.run('OTY3MTI4NzI2NjE1NzUyNzI1.YmLy0A.ac3wfqwCuvAf9q5wU-wShcD81aw') 
+bot.run('') 
