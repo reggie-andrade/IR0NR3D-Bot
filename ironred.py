@@ -1,5 +1,6 @@
 # Import statements ===============================================================================================================
 
+from pickle import FALSE
 import discord
 from discord.ext import commands
 import re
@@ -16,7 +17,6 @@ bot = commands.Bot(command_prefix=prefix) # Sets prefix for bot
 
 times = {} # Empty dictionary for user id's and the time thier battle ready ends. Used for checking if user is battle ready and calculating time remaining.
 userTimers = {} # Empty dictionary for user id's and their corresponding timer object. Used for cancelling user's timers
-rankFields = ["id", "rank"]
 
 ranks = {
     "b1": "Bronze I", 
@@ -79,6 +79,18 @@ async def ApplyBattleReady(userid, duration, durationType, context, text):
 
     # Send embed message saying the user is now ready
     await context.send(embed=embed)
+
+def GetRank(userid):
+    with open("ranks.csv", "r") as f:
+        reader = csv.reader(f)
+        rank = ""
+        hasRank = False
+
+        for row in reader:
+            if int(row[0]) == userid:
+                hasRank = True
+                rank = row[1]
+    return hasRank, rank
 
 # Events ==========================================================================================================================
 
@@ -165,16 +177,24 @@ async def ready(ctx, text):
         if len(times) != 0:
             # Loop through dictionary and display user's display name along with the time they have remaining on battle ready.
             for userid, endTime in times.items():
+                # Get user object, and get username from object
                 user = await ctx.author.guild.fetch_member(userid)
                 username = user.display_name
 
-                # Check if user time left is permenant or not
+                # Get if user has a valid rank and the rank they have using the GetRank function
+                hasRank, rank = GetRank(userid)
+
+                # Check if user time left is permenant or not, and format embed text
                 if endTime != 0:
                     timeRemaining = time.strftime("%H:%M:%S", time.gmtime(endTime - time.time()))
 
                     embedText = f"{embedText}\n{username} | Ready for {timeRemaining}"
                 else:
                     embedText = f"{embedText}\n{username} | Ready permanently"
+
+                # Check if user has rank, and format embed text
+                if hasRank:
+                    embedText = f"{embedText} | **{rank}**"
 
             # Set message
             embed=discord.Embed(title="Battle Ready list", description=embedText, color=discord.Color.blue())
@@ -243,13 +263,37 @@ async def ready(ctx, text):
 @bot.command()
 async def rank(ctx, text):
     user = ctx.message.author.id
+    alreadyHasRank = False
+
+    with open("ranks.csv", "r") as f:
+        reader = csv.reader(f)
+
+        for row in reader:
+            if int(row[0]) == user:
+                alreadyHasRank = True
+                rank = row[1]
+
+    if text == "view":
+        if alreadyHasRank:
+            embed=discord.Embed(title="Currently set rank", description=f"Rank: **{rank}**", color=discord.Color.blue())
+        else:
+            embed=discord.Embed(description=f"You haven't set your rank! To set your rank, use the **-rank [abbreviation]** to set your rank. (ex. -rank b2, -rank g1, -rank c)", color=discord.Color.orange())
+
+        await ctx.send(embed=embed)
 
     for rank, rankName in ranks.items():
         if text == rank:
-            with open("ranks.csv", "w") as f:
-                writer = csv.writer(f)
-                writer.writerow([user, rank])
+            if alreadyHasRank:
+                embed=discord.Embed(description="You've already set your rank! To change your rank, use the **-rank del** command to remove your rank, then set it again using this command.", color=discord.Color.orange())
+            else:
+                with open("ranks.csv", "a+", newline="") as f:
+                    writer = csv.writer(f)
+                    
+                    writer.writerow([user, rankName])
+                    embed=discord.Embed(title="Rank set", description="Your rank has been set! Your rank will appear next to your name in the battle ready list.\nNote: If you are reported to be using an invalid rank, your ability to use the rank command may be removed.", color=discord.Color.green())
+            
+            await ctx.send(embed=embed)
 
 # Finalization ======================================================================================================================
 # Run the bot using the bot's key
-bot.run('') 
+bot.run('OTY3MTI4NzI2NjE1NzUyNzI1.Gdsl-v.i2SsxGmWmG3dmj1rMvTAWVcc6eHAwzdcsMFYAw') 
