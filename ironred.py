@@ -15,10 +15,10 @@ prefix = "-" # Variable for prefix, used everywhere when prefix is mentioned exc
 client = discord.Client() # For connection to discord
 bot = commands.Bot(command_prefix=prefix) # Sets prefix for bot
 
-times = {} # Empty dictionary for user id's and the time thier battle ready ends. Used for checking if user is battle ready and calculating time remaining.
+times = {} # Empty dictionary for user id's and the time their battle ready ends. Used for checking if user is battle ready and calculating time remaining.
 userTimers = {} # Empty dictionary for user id's and their corresponding timer object. Used for cancelling user's timers.
 
-# Ranks dictionary to store basic Ironlights ranks. Can be changed with no issues.
+# Ranks dictionary to store basic Ironlights ranks. Can be modified with no issues.
 ranks = {
     "b": "Bronze", 
     "s": "Silver", 
@@ -31,7 +31,7 @@ ranks = {
 
 # Functions ======================================================================================================================
 
-# Pretty loaded function to apply battle ready under a certain user. Timer has an upper limit of 24h due to restraints of the time module.
+# Applies battle ready role under a certain user. Timer has an upper limit of 24h due to restraints of the time module.
 async def ApplyBattleReady(userid, duration, durationType, context, text):
     # Grabbing the battle ready role
     battleReady = discord.utils.get(context.author.guild.roles, name = "Battle Ready")
@@ -94,7 +94,7 @@ def GetRank(userid):
 
 # Events ==========================================================================================================================
 
-# Simple event to print when bot is online
+# Print when bot is online
 @bot.event
 async def on_ready():
     print('IR0NR3D is online.')
@@ -165,7 +165,7 @@ async def ready(ctx, text):
         embedText = ""
         embed = discord.Embed(description="Empty", color=discord.Color.red())
 
-        # Huge if statement to check if the user wants a normal list, or wants to search in the list
+        # Check if the user wants a normal list, or wants to search in the list
         if text == "list":
             # If times isn't empty, create and display list
             if len(times) != 0:
